@@ -1,0 +1,88 @@
+{
+  "models": [
+    {
+      "id": "sofia",
+      "name": "Sofia",
+      "age": 28,
+      "style_archetype": "Bohème Parisienne",
+      "skin": "claire/olive",
+      "hair_color": "châtain",
+      "hair_type": "ondulé",
+      "hair_length": "long, 60-80cm",
+      "eyes": "noisette",
+      "height_cm": 175,
+      "waist_cm": 62,
+      "default_hairstyle": "cheveux détachés"
+    },
+    {
+      "id": "camille",
+      "name": "Camille",
+      "age": 35,
+      "style_archetype": "CSP+ élégante",
+      "skin": "claire",
+      "hair_color": "châtain foncé",
+      "hair_type": "lisse",
+      "hair_length": "moyen, 40-50cm",
+      "eyes": "bleu gris",
+      "height_cm": 170,
+      "waist_cm": 60,
+      "default_hairstyle": "chignon sophistiqué"
+    },
+    {
+      "id": "lea",
+      "name": "Léa",
+      "age": 22,
+      "style_archetype": "Gen Z Streetwear",
+      "skin": "claire rosée",
+      "hair_color": "blond cendré",
+      "hair_type": "ondulé",
+      "hair_length": "moyen, 35-45cm",
+      "eyes": "bleu clair",
+      "height_cm": 172,
+      "waist_cm": 58,
+      "default_hairstyle": "cheveux détachés ondulés"
+    },
+    {
+      "id": "isabelle",
+      "name": "Isabelle",
+      "age": 45,
+      "style_archetype": "Femme Active Moderne",
+      "skin": "mate dorée",
+      "hair_color": "auburn roux",
+      "hair_type": "ondulé naturel",
+      "hair_length": "moyen, 45-55cm",
+      "eyes": "noisette ambré",
+      "height_cm": 168,
+      "waist_cm": 64,
+      "default_hairstyle": "demi-chignon élégant"
+    },
+    {
+      "id": "amara",
+      "name": "Amara",
+      "age": 30,
+      "style_archetype": "Cosmopolite Afro-chic",
+      "skin": "mate profonde",
+      "hair_color": "noir profond",
+      "hair_type": "frisé/bouclé",
+      "hair_length": "afro, 15-25cm",
+      "eyes": "noir brillant",
+      "height_cm": 178,
+      "waist_cm": 61,
+      "default_hairstyle": "afro coiffée"
+    },
+    {
+      "id": "hana",
+      "name": "Hana",
+      "age": 32,
+      "style_archetype": "Minimaliste Nordique",
+      "skin": "très claire",
+      "hair_color": "blond platine",
+      "hair_type": "lisse",
+      "hair_length": "carré, 30-40cm",
+      "eyes": "bleu clair intense",
+      "height_cm": 176,
+      "waist_cm": 59,
+      "default_hairstyle": "carré sleek minimal"
+    }
+  ]
+}
