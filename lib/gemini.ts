@@ -1,16 +1,19 @@
 /**
  * Gemini Nano Banana Pro (gemini-3-pro-image) client.
  * Server-only — never bundle this into a Client Component.
+ *
+ * Reads product references over HTTP from the deployment's own public
+ * URL rather than from disk. This keeps the 130 MB of catalog images
+ * out of the serverless function bundle (otherwise we breach Vercel's
+ * 250 MB function size limit).
  */
 
 import { GoogleGenAI } from "@google/genai";
-import { join } from "node:path";
 import { buildPrompt, type Shot } from "./prompt";
 import { findModel, findBelt, findBuckle } from "./data";
 import { tightCropToBuffer } from "./image";
 
 const MODEL_NAME = "gemini-3-pro-image";
-const PUBLIC_DIR = join(process.cwd(), "public");
 
 export interface GenerateInputs {
   modelId: string;
@@ -23,12 +26,12 @@ export interface GenerateInputs {
   shot?: Shot;
   sizeMult?: number;
   beltMult?: number;
+  /** Absolute origin to resolve catalog asset URLs against (e.g. https://app.vercel.app). */
+  origin: string;
 }
 
 export interface GenerateResult {
-  /** Base64-encoded PNG (no data: prefix). */
   imageBase64: string;
-  /** Mime type, typically "image/png". */
   mimeType: string;
 }
 
@@ -46,12 +49,12 @@ export async function generateImage(input: GenerateInputs): Promise<GenerateResu
   if (!belt) throw new Error(`unknown belt: ${input.beltId}`);
   if (!buckle) throw new Error(`unknown buckle: ${input.buckleId}`);
 
-  const beltPath = join(PUBLIC_DIR, belt.url.replace(/^\//, ""));
-  const bucklePath = join(PUBLIC_DIR, buckle.url.replace(/^\//, ""));
+  const beltUrl = new URL(belt.url, input.origin).toString();
+  const buckleUrl = new URL(buckle.url, input.origin).toString();
 
   const [beltBuf, buckleBuf] = await Promise.all([
-    tightCropToBuffer(beltPath),
-    tightCropToBuffer(bucklePath),
+    tightCropToBuffer(beltUrl),
+    tightCropToBuffer(buckleUrl),
   ]);
 
   const prompt = buildPrompt({

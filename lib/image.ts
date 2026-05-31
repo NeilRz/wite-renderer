@@ -1,25 +1,38 @@
 /**
  * Tight-crop helper. Strips a near-white background around a product
- * image so Gemini receives a tight, well-framed reference (which is
- * the single biggest fidelity win, validated against the Gradio version).
+ * image so Gemini receives a tight, well-framed reference (the single
+ * biggest fidelity win, validated against the Gradio version).
+ *
+ * Accepts EITHER a URL string OR a raw Buffer. URLs are fetched over
+ * HTTP, which is how production reads from `public/catalog/` without
+ * the catalog landing inside the serverless function bundle.
  */
 
 import sharp from "sharp";
 
-/**
- * Crop white/near-white background tight around the product, then
- * return the result as a JPEG buffer ready for Gemini.
- */
 export async function tightCropToBuffer(
-  inputPath: string,
+  source: string | Buffer,
   padding = 24,
   whiteThreshold = 240,
 ): Promise<Buffer> {
-  const img = sharp(inputPath).rotate(); // honour EXIF
-  const { width, height } = await img.metadata();
-  if (!width || !height) return await img.jpeg({ quality: 95 }).toBuffer();
+  let input: Buffer;
+  if (typeof source === "string") {
+    const res = await fetch(source);
+    if (!res.ok) {
+      throw new Error(`failed to fetch ${source}: ${res.status}`);
+    }
+    input = Buffer.from(await res.arrayBuffer());
+  } else {
+    input = source;
+  }
 
-  // Convert to a grayscale mask: foreground = anything darker than threshold.
+  const img = sharp(input).rotate(); // honour EXIF
+  const { width, height } = await img.metadata();
+  if (!width || !height) {
+    return await img.jpeg({ quality: 95 }).toBuffer();
+  }
+
+  // Build a grayscale mask. Foreground = anything darker than threshold.
   const gray = await img
     .clone()
     .ensureAlpha()
@@ -50,7 +63,7 @@ export async function tightCropToBuffer(
   const right = Math.min(width, maxX + padding);
   const bottom = Math.min(height, maxY + padding);
 
-  return await sharp(inputPath)
+  return await sharp(input)
     .rotate()
     .extract({
       left,

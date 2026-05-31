@@ -52,6 +52,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Resolve the deployment origin so the render function can fetch
+  // product images over HTTP rather than reading them from disk.
+  const origin =
+    req.nextUrl.origin ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  if (!origin) return bad("could not resolve request origin", 500);
+
   const inputs: GenerateInputs = {
     modelId: body.modelId!,
     beltId: body.beltId!,
@@ -63,6 +70,7 @@ export async function POST(req: NextRequest) {
     shot: body.shot ?? "waist",
     sizeMult: typeof body.sizeMult === "number" ? body.sizeMult : 1.0,
     beltMult: typeof body.beltMult === "number" ? body.beltMult : 1.0,
+    origin,
   };
 
   const encoder = new TextEncoder();
