@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { Model, Product } from "@/lib/data";
 import type { Shot, OutfitKey, MakeupKey, HairKey } from "@/lib/prompt";
-import { SETTING_PRESETS, POSE_PRESETS } from "@/lib/presets";
+import { POSE_PRESETS } from "@/lib/presets";
 
 const OUTFIT_CHOICES: { key: OutfitKey; label: string }[] = [
   { key: "", label: "Auto (l'IA choisit)" },
@@ -58,8 +58,13 @@ const SHOT_OPTIONS: { key: Shot; label: string }[] = [
   { key: "full", label: "Plein pied" },
 ];
 
-const SETTING_KEYS = Object.keys(SETTING_PRESETS);
 const POSE_KEYS = Object.keys(POSE_PRESETS);
+
+const SETTING_PLACEHOLDER =
+  "Ex: plage au coucher de soleil, sable doré, ciel orangé en arrière-plan flou.\n" +
+  "Ex: chemin de montagne en pleine nature, lumière de fin de journée, herbe haute.\n" +
+  "Ex: studio fond gris neutre, éclairage doux de côté.\n" +
+  "Ex: terrasse de café à Rome, façade en pierre, lumière chaude.";
 
 export function Picker({ models, belts, buckles }: Props) {
   // ---------- selection state ----------
@@ -74,8 +79,7 @@ export function Picker({ models, belts, buckles }: Props) {
   const [shot, setShot] = useState<Shot>("waist");
   const [beltMult, setBeltMult] = useState(1.0);
   const [sizeMult, setSizeMult] = useState(1.0);
-  const [settingPreset, setSettingPreset] = useState(SETTING_KEYS[0]);
-  const [setting, setSetting] = useState(SETTING_PRESETS[SETTING_KEYS[0]]);
+  const [setting, setSetting] = useState("");
   const [posePreset, setPosePreset] = useState(POSE_KEYS[0]);
   const [pose, setPose] = useState(POSE_PRESETS[POSE_KEYS[0]]);
   const [beltDesc, setBeltDesc] = useState("");
@@ -115,10 +119,6 @@ export function Picker({ models, belts, buckles }: Props) {
   );
 
   // ---------- preset wiring ----------
-  function selectSettingPreset(key: string) {
-    setSettingPreset(key);
-    setSetting(SETTING_PRESETS[key] ?? "");
-  }
   function selectPosePreset(key: string) {
     setPosePreset(key);
     setPose(POSE_PRESETS[key] ?? "");
@@ -346,25 +346,20 @@ export function Picker({ models, belts, buckles }: Props) {
             />
           </Section>
 
-          {/* 4. Setting */}
+          {/* 4. Setting — open prompt */}
           <Section step="4" title="Décor">
-            <select
-              value={settingPreset}
-              onChange={(e) => selectSettingPreset(e.target.value)}
-              className="mb-2 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm"
-            >
-              {SETTING_KEYS.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </select>
             <textarea
               value={setting}
               onChange={(e) => setSetting(e.target.value)}
-              rows={4}
-              className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm"
+              rows={5}
+              placeholder={SETTING_PLACEHOLDER}
+              className="w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm placeholder:text-stone-400"
             />
+            <p className="mt-1 text-xs text-stone-500">
+              Décris le lieu librement (en français ou en anglais). Plus tu donnes
+              de détails (lumière, ambiance, arrière-plan), plus le rendu sera
+              fidèle à ce que tu imagines.
+            </p>
           </Section>
 
           {/* 5. Pose */}
