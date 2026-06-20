@@ -7,6 +7,67 @@ import type { Model } from "./data";
 
 export type Shot = "waist" | "half" | "full";
 
+/** Optional style override keys. Empty string = use model default / no override. */
+export type OutfitKey =
+  | "classique" | "soiree" | "sportif" | "urban" | "outdoor" | "boho" | "sexy" | "";
+export type MakeupKey =
+  | "naturel" | "elegant" | "party" | "sexy" | "soiree" | "travail" | "";
+export type HairKey =
+  | "classique" | "sophistique" | "sport" | "laches"
+  | "queue" | "chignon" | "sexy" | "";
+
+/** Each value is a concrete visual descriptor — generic words like "élégant" alone
+ *  produce indistinguishable results across categories, so we lean on specifics. */
+
+export const OUTFIT_STYLES: Record<Exclude<OutfitKey, "">, string> = {
+  classique:
+    "A timeless daytime outfit: a crisp tucked-in shirt or simple fine-knit top with high-waist tailored trousers or an A-line skirt, neutral palette (cream, stone, navy, camel), refined and understated.",
+  soiree:
+    "A formal evening outfit: a sleek satin or silk camisole tucked into dark tailored high-waist trousers, OR a fitted little black dress with a defined waistline. Dark palette, sharp lines, evening-event finish.",
+  sportif:
+    "A modern athleisure-leaning outfit: a fitted ribbed tank or technical fine-knit tucked into sleek high-waist sport trousers or styled leggings. Muted athletic palette (charcoal, sand, sage, off-white), elevated not gym.",
+  urban:
+    "A street-style outfit: an oversized tailored blazer over a tucked plain tee, wide-leg cargo or raw denim, contemporary city palette (graphite, stone, washed black). Considered streetwear, not casual.",
+  outdoor:
+    "A refined outdoor outfit: a utility-cut shirt tucked into the waist, technical trousers or a wax-treated skirt, earthy palette (olive, rust, sand, ecru). Heritage-outdoor inspired but elevated and clean.",
+  boho:
+    "A bohemian outfit: a flowing tucked silk-blend blouse or wrap top with earth-toned wide-leg trousers or a long bias skirt, layered natural textures, warm palette (terracotta, cream, dusty olive).",
+  sexy:
+    "A body-emphasizing outfit: a fitted second-skin tucked top with a notable neckline (deep V, square, or bandeau) OR a sleek bodysuit tucked into a high-waist skirt or trouser. Lines elongate the waist where the belt sits.",
+};
+
+export const MAKEUP_STYLES: Record<Exclude<MakeupKey, "">, string> = {
+  naturel:
+    "Bare-skin no-makeup look — light tinted moisturizer, groomed brows, mascara only, neutral lip balm. Skin reads as itself.",
+  elegant:
+    "Refined editorial makeup — polished matte skin, defined brow, soft taupe shadow, subtle eyeliner, neutral satin lip. Quietly perfected.",
+  party:
+    "Festive makeup — light shimmer on the eyelid, defined liner, glossy lip, slight inner-corner highlight. Playful and lit-up.",
+  sexy:
+    "Bold seductive makeup — smoky bronze/brown eye, defined liner, sculpted contour on the cheekbone, matte red or deep berry lip. Confident.",
+  soiree:
+    "Full evening glam — smoky shadow with shimmer accent, sharp winged liner, dramatic lash, contoured cheekbone, satin nude or deep berry lip.",
+  travail:
+    "Polished daytime office makeup — even skin, soft brown shadow wash, mascara, defined brow, nude-pink satin lip. Composed and professional.",
+};
+
+export const HAIR_STYLES: Record<Exclude<HairKey, "">, string> = {
+  classique:
+    "A classic blow-dry, hair worn down with soft natural volume, ends curled in slightly, timeless and unfussed.",
+  sophistique:
+    "Sophisticated styled hair — defined glossy waves with a clean side parting, every strand placed, editorial finish.",
+  sport:
+    "A sleek slicked-back high ponytail, hair pulled tight and clean off the face.",
+  laches:
+    "Hair worn naturally loose and undone — soft texture, no obvious styling, slightly tousled.",
+  queue:
+    "A polished mid-height ponytail, sleek crown, hair gathered cleanly at the nape, length falling smoothly.",
+  chignon:
+    "An elegant low chignon at the nape of the neck, smooth crown, no flyaways.",
+  sexy:
+    "Voluminous tousled hair — beachy waves, deep texture, slight grit, a 'just-undone' fullness that frames the face.",
+};
+
 export const FRAMING: Record<Shot, string> = {
   waist:
     "== FRAMING (critical) ==\n" +
@@ -89,7 +150,13 @@ export interface PromptInputs {
   shot?: Shot;
   sizeMult?: number;
   beltMult?: number;
+  outfit?: OutfitKey;
+  makeup?: MakeupKey;
+  hair?: HairKey;
 }
+
+const DEFAULT_OUTFIT =
+  "A simple modern outfit that does NOT cover or obscure the belt or buckle (e.g. tucked silk blouse + high-waist trouser, fitted dress with belted waist, knit + skirt).";
 
 export function buildPrompt({
   model,
@@ -100,6 +167,9 @@ export function buildPrompt({
   shot = "waist",
   sizeMult = 1.0,
   beltMult = 1.0,
+  outfit = "",
+  makeup = "",
+  hair = "",
 }: PromptInputs): string {
   const framing = FRAMING[shot] ?? FRAMING.waist;
   const beltBlock = beltDesc
@@ -108,6 +178,14 @@ export function buildPrompt({
   const buckleBlock = buckleDesc
     ? `BUCKLE — the SECOND reference image.\nDescription: ${buckleDesc}\n`
     : "BUCKLE — the SECOND reference image.\n";
+
+  const outfitDescriptor = outfit ? OUTFIT_STYLES[outfit] : DEFAULT_OUTFIT;
+  const hairLine = hair
+    ? HAIR_STYLES[hair]
+    : `styled as ${model.default_hairstyle}`;
+  const makeupLine = makeup
+    ? `- Makeup: ${MAKEUP_STYLES[makeup]}`
+    : "";
 
   return `Create a single photorealistic editorial fashion photograph in the visual language of a top-tier luxury belt brand (Hermès / Saint Laurent / Khaite). The BELT and BUCKLE are the HERO of the image, not the model.
 
@@ -132,12 +210,13 @@ ${buckleBlock}
 
 == MODEL ==
 - ${model.age}-year-old woman, archetype: ${model.style_archetype}
-- Skin: ${model.skin}; Hair: ${model.hair_color}, ${model.hair_type}, ${model.hair_length}, styled as ${model.default_hairstyle}
+- Skin: ${model.skin}; Hair: ${model.hair_color}, ${model.hair_type}, ${model.hair_length}, ${hairLine}
 - Eyes: ${model.eyes}; Build: ${model.height_cm}cm tall, waist ${model.waist_cm}cm, slim editorial proportions.
+${makeupLine}
 
 == OUTFIT ==
-- A simple, modern outfit that does NOT cover or obscure the belt or buckle (tucked silk blouse, fine knit tucked in, fitted top + high-waist trouser or skirt).
-- Outfit colors complement the belt without competing with it. Neutral, editorial palette.
+- ${outfitDescriptor}
+- The outfit must NOT cover or obscure the belt or buckle. Outfit colors complement the belt without competing with it.
 
 == SETTING ==
 ${setting}

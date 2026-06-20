@@ -9,7 +9,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
-import { buildPrompt, type Shot } from "./prompt";
+import { buildPrompt, type Shot, type OutfitKey, type MakeupKey, type HairKey } from "./prompt";
 import { findModel, findBelt, findBuckle } from "./data";
 import { tightCropToBuffer } from "./image";
 
@@ -26,6 +26,9 @@ export interface GenerateInputs {
   shot?: Shot;
   sizeMult?: number;
   beltMult?: number;
+  outfit?: OutfitKey;
+  makeup?: MakeupKey;
+  hair?: HairKey;
   /** Absolute origin to resolve catalog asset URLs against (e.g. https://app.vercel.app). */
   origin: string;
 }
@@ -66,6 +69,9 @@ export async function generateImage(input: GenerateInputs): Promise<GenerateResu
     shot: input.shot,
     sizeMult: input.sizeMult,
     beltMult: input.beltMult,
+    outfit: input.outfit,
+    makeup: input.makeup,
+    hair: input.hair,
   });
 
   const ai = new GoogleGenAI({ apiKey: requireKey() });

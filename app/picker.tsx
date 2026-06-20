@@ -3,8 +3,40 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { Model, Product } from "@/lib/data";
-import type { Shot } from "@/lib/prompt";
+import type { Shot, OutfitKey, MakeupKey, HairKey } from "@/lib/prompt";
 import { SETTING_PRESETS, POSE_PRESETS } from "@/lib/presets";
+
+const OUTFIT_CHOICES: { key: OutfitKey; label: string }[] = [
+  { key: "", label: "Auto (l'IA choisit)" },
+  { key: "classique", label: "Classique" },
+  { key: "soiree", label: "Soirée" },
+  { key: "sportif", label: "Sportif" },
+  { key: "urban", label: "Urban" },
+  { key: "outdoor", label: "Outdoor" },
+  { key: "boho", label: "Boho" },
+  { key: "sexy", label: "Sexy" },
+];
+
+const MAKEUP_CHOICES: { key: MakeupKey; label: string }[] = [
+  { key: "", label: "Auto (l'IA choisit)" },
+  { key: "naturel", label: "Naturel" },
+  { key: "elegant", label: "Élégant" },
+  { key: "party", label: "Party" },
+  { key: "sexy", label: "Sexy" },
+  { key: "soiree", label: "Soirée" },
+  { key: "travail", label: "Travail" },
+];
+
+const HAIR_CHOICES: { key: HairKey; label: string }[] = [
+  { key: "", label: "Auto (selon mannequin)" },
+  { key: "classique", label: "Classique" },
+  { key: "sophistique", label: "Sophistiqué" },
+  { key: "sport", label: "Sport" },
+  { key: "laches", label: "Cheveux relâchés" },
+  { key: "queue", label: "Queue de cheval" },
+  { key: "chignon", label: "Chignon" },
+  { key: "sexy", label: "Sexy" },
+];
 
 interface Props {
   models: Model[];
@@ -32,6 +64,9 @@ const POSE_KEYS = Object.keys(POSE_PRESETS);
 export function Picker({ models, belts, buckles }: Props) {
   // ---------- selection state ----------
   const [modelId, setModelId] = useState(models[0]?.id ?? "");
+  const [outfit, setOutfit] = useState<OutfitKey>("");
+  const [makeup, setMakeup] = useState<MakeupKey>("");
+  const [hair, setHair] = useState<HairKey>("");
   const [beltId, setBeltId] = useState<string>("");
   const [buckleId, setBuckleId] = useState<string>("");
   const [beltSearch, setBeltSearch] = useState("");
@@ -123,6 +158,9 @@ export function Picker({ models, belts, buckles }: Props) {
           shot,
           sizeMult,
           beltMult,
+          outfit,
+          makeup,
+          hair,
           beltDesc: beltDesc.trim() || undefined,
           buckleDesc: buckleDesc.trim() || undefined,
         }),
@@ -219,6 +257,53 @@ export function Picker({ models, belts, buckles }: Props) {
                 </option>
               ))}
             </select>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-stone-500">
+                  Outfit
+                </span>
+                <select
+                  value={outfit}
+                  onChange={(e) => setOutfit(e.target.value as OutfitKey)}
+                  className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm"
+                >
+                  {OUTFIT_CHOICES.map((c) => (
+                    <option key={c.key} value={c.key}>{c.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-stone-500">
+                  Maquillage
+                </span>
+                <select
+                  value={makeup}
+                  onChange={(e) => setMakeup(e.target.value as MakeupKey)}
+                  className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm"
+                >
+                  {MAKEUP_CHOICES.map((c) => (
+                    <option key={c.key} value={c.key}>{c.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-stone-500">
+                  Coiffure
+                </span>
+                <select
+                  value={hair}
+                  onChange={(e) => setHair(e.target.value as HairKey)}
+                  className="mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2 text-sm"
+                >
+                  {HAIR_CHOICES.map((c) => (
+                    <option key={c.key} value={c.key}>{c.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </Section>
 
           {/* 2. Belt picker */}

@@ -70,6 +70,9 @@ export async function POST(req: NextRequest) {
     shot: body.shot ?? "waist",
     sizeMult: typeof body.sizeMult === "number" ? body.sizeMult : 1.0,
     beltMult: typeof body.beltMult === "number" ? body.beltMult : 1.0,
+    outfit: body.outfit ?? "",
+    makeup: body.makeup ?? "",
+    hair: body.hair ?? "",
     origin,
   };
 
